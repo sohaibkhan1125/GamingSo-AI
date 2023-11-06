@@ -1,4 +1,5 @@
 'use client';
+'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
@@ -35,13 +36,14 @@ const InputForm = () => {
         url: 'https://api.openai.com/v1/engines/text-davinci-002/completions',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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', // Replace with your OpenAI API key
+          'Authorization': 'Bearer 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          ', // Replace with your OpenAI API key
         },
         data: {
           prompt: userInput,
           max_tokens: 500, // Adjust as needed
         }
       };
+      
 
       const response = await axios(options);
 
@@ -92,12 +94,16 @@ const InputForm = () => {
   };
 
   const buttonPrompts = [
+    'Discover top consoles that meet your needs',
+    'Get concise steps for a full OS reinstallation',
     'Discover top computers that meet your needs',
     'Receive tips to boost your gaming skills',
     'Discover top laptops that meet your needs',
     'Get mobile game recommendations',
     'Discover top monitors that meet your needs',
     'Discover top monitors that meet your needs',
+    'Get PC and console game recommendations',
+    'Get Coupon code for games and consoles',
     'Any Other Question or Chat with GameSoI AI',
   ];
 
@@ -114,12 +120,12 @@ const InputForm = () => {
         <h1 className="text-7xl font-bold">Gamers Solution AI</h1>
         <p>Unlocking Victory with Unrivaled Intelligence</p>
       </div>
-      <div className="text-white ml-5 grid grid-cols-1 sm:grid-cols-3 gap-3 px-20 mt-20">
+      <div className="text-white  ml-5 grid grid-cols-1 sm:grid-cols-3 gap-3 px-20 mt-20 mb-8 hover:border-yellow-200">
         {buttonPrompts.map((prompt, index) => (
           <button
             key={index}
-            className={`bg-gray-600 hover:bg-gray-700 px-2 py-2 rounded border-[3px] ${
-              index === buttonPrompts.length - 1 ? 'text-yellow-800 text-xl font-semibold bg-red-100 border-[3px] hover-bg-slate-200' : ''
+            className={` hover:bg-gray-700 px-2 py-2 rounded border-[3px] border-[#33ccff] ${
+              index === buttonPrompts.length - 1 ? 'text-white text-xl font-semibold  border-[3px] hover:bg-slate-900 border-[#ff99cc]' : ''
             }`}
             onClick={() => handleButtonClick(prompt)}
           >
@@ -197,6 +203,7 @@ const InputForm = () => {
 
      
     </section>
+
   );
 };
 
