@@ -31,12 +31,15 @@ const InputForm = () => {
     try {
       setIsLoading(true); // Show the loader
 
+      const openaiApiKey = process.env.OPENAI_API_KEY;
+
+
       const options = {
         method: 'POST',
         url: 'https://api.openai.com/v1/engines/text-davinci-002/completions',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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          ', // Replace with your OpenAI API key
+          'Authorization': `Bearer ${openaiApiKey}`, // Replace with your OpenAI API key
         },
         data: {
           prompt: userInput,
