@@ -16,12 +16,23 @@
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+body::before {
+  content: "";
+  background-image: url('Game 1.png'); 
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1.9; /* 40% darkness (1 - 0.4) */
+  background-color: rgba(0, 0, 0, 1); /* Black background with 100% opacity */
+  z-index: -1;
 }
+
+body {
+  background: none; 
+}
+
