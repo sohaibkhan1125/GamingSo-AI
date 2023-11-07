@@ -1,11 +1,12 @@
 'use client';
-'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import Logo from './Logo.png';
 import { FaPaperPlane } from 'react-icons/fa';
 import './InputForm.css';
+import { FaRedo } from 'react-icons/fa';
+
 
 const InputForm = () => {
   const [conversation, setConversation] = useState([]);
@@ -14,7 +15,6 @@ const InputForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userHistory, setUserHistory] = useState([]);
 
-  // Load user history from local storage on component mount
   useEffect(() => {
     const storedUserHistory = JSON.parse(localStorage.getItem('userHistory'));
     if (storedUserHistory) {
@@ -22,55 +22,52 @@ const InputForm = () => {
     }
   }, []);
 
-  // Function to save user history to local storage
   const saveUserHistoryToLocalStorage = () => {
     localStorage.setItem('userHistory', JSON.stringify(userHistory));
   };
 
   const handleUserInput = async () => {
     try {
-      setIsLoading(true); // Show the loader
-
-      const openaiApiKey = process.env.OPENAI_API_KEY;
-
+      setIsLoading(true);
 
       const options = {
         method: 'POST',
         url: 'https://api.openai.com/v1/engines/text-davinci-002/completions',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`, // Replace with your OpenAI API key
+          'Authorization': 'Bearer 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',
         },
         data: {
           prompt: userInput,
-          max_tokens: 500, // Adjust as needed
-        }
+          max_tokens: 500,
+        },
       };
-      
 
       const response = await axios(options);
-
       const botResponse = response.data.choices[0].text;
 
-      setConversation((prevConversation) => [
-        ...prevConversation,
+      const updatedConversation = [
+        ...conversation,
         { type: 'user', text: userInput },
         { type: 'bot', text: botResponse },
-      ]);
+      ];
+      setConversation(updatedConversation);
 
-      // Save user history
-      const userPrompt = userInput.split(' ').slice(0, 4).join(' '); // Get the first 4 words of the user's input
-      setUserHistory((prevUserHistory) => [
-        ...prevUserHistory,
-        { prompt: userPrompt, response: botResponse, conversation: [...conversation] },
-      ]);
+      const userPrompt = userInput.split(' ').slice(0, 4).join('');
+      const updatedUserHistory = [
+        ...userHistory,
+        { prompt: userPrompt, response: botResponse, conversation: updatedConversation },
+      ];
+      setUserHistory(updatedUserHistory);
+
+      // Save conversation to local storage
       saveUserHistoryToLocalStorage();
 
       setUserInput('');
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false); // Hide the loader
+      setIsLoading(false);
     }
   };
 
@@ -91,7 +88,6 @@ const InputForm = () => {
   };
 
   const handleUserHistoryClick = (historyItem) => {
-    // Show the full conversation for the selected user history item
     setConversation(historyItem.conversation);
     setIsConversationVisible(true);
   };
@@ -114,7 +110,7 @@ const InputForm = () => {
     <section className="w-screen">
       <nav className="flex">
         <Image src={Logo} height={150} width={150} alt="Logo" />
-        <ul className="text-xl text-white whitespace-nowrap flex gap-3 px-[75%] mt-7">
+        <ul className="text-xl text-white whitespace-nowrap flex gap-3 px-10 mt-[43px] sm:px-[75%] sm:mt-7">
           <li>About</li>
           <li>Contact</li>
         </ul>
@@ -123,12 +119,14 @@ const InputForm = () => {
         <h1 className="text-7xl font-bold">Gamers Solution AI</h1>
         <p>Unlocking Victory with Unrivaled Intelligence</p>
       </div>
-      <div className="text-white  ml-5 grid grid-cols-1 sm:grid-cols-3 gap-3 px-20 mt-20 mb-8 hover:border-yellow-200">
+      <div className="text-white ml-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:px-20 mt-20 mb-8 hover:border-yellow-200">
         {buttonPrompts.map((prompt, index) => (
           <button
             key={index}
             className={` hover:bg-gray-700 px-2 py-2 rounded border-[3px] border-[#33ccff] ${
-              index === buttonPrompts.length - 1 ? 'text-white text-xl font-semibold  border-[3px] hover:bg-slate-900 border-[#ff99cc]' : ''
+              index === buttonPrompts.length - 1
+                ? 'text-white text-xl font-semibold  border-[3px] hover-bg-slate-900 border-[#ff99cc]'
+                : ''
             }`}
             onClick={() => handleButtonClick(prompt)}
           >
@@ -161,19 +159,25 @@ const InputForm = () => {
               className="absolute bg-[transparent]  border-[2px] border-gray-500 w-[90%] mt-[42%] ml-4 rounded py-2 px-2 text-white"
               placeholder="Send a message"
             />
-            <div className="text-white ml-[85%] sm:ml-[88%] sm:mt-[43%] mt-[46%] cursor-pointer absolute" onClick={handleUserInput}>
+            <div
+              className="text-white ml-[85%] sm:ml-[88%] sm:mt-[43%] mt-[46%] cursor-pointer absolute"
+              onClick={handleUserInput}
+            >
               <FaPaperPlane />
+            </div>
+            <div className='mt-[43%] px-[93%] cursor-pointer'>
+            <FaRedo size={23} color="gray" onClick={() => window.location.reload()} />
+
             </div>
           </div>
         </div>
       )}
-
+      
       {isLoading && (
         <div className="loader-overlay">
           <div className="loader"></div>
         </div>
       )}
-
       <style jsx>
         {`
           .loader-overlay {
@@ -198,15 +202,16 @@ const InputForm = () => {
           }
 
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
           }
         `}
       </style>
-
-     
     </section>
-
   );
 };
 
