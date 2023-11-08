@@ -26,6 +26,9 @@ const InputForm = () => {
     localStorage.setItem('userHistory', JSON.stringify(userHistory));
   };
 
+  const config = require('./config');
+  const openaiApiKey = config.openaiApiKey;
+
   const handleUserInput = async () => {
     try {
       setIsLoading(true);
@@ -35,7 +38,7 @@ const InputForm = () => {
         url: 'https://api.openai.com/v1/engines/text-davinci-002/completions',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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',
+          'Authorization': `Bearer ${openaiApiKey}`,
         },
         data: {
           prompt: userInput,
