@@ -121,7 +121,7 @@ const InputForm = () => {
         <h1 className="text-7xl font-bold">Gamers Solution AI</h1>
         <p>Unlocking Victory with Unrivaled Intelligence</p>
       </div>
-      <div className="text-white ml-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:px-20 mt-20 mb-8 hover:border-yellow-200">
+      <div className="text-white ml-5 grid grid-cols-1 sm:grid-cols-3 gap-3 mr-3 sm:px-20 mt-20 mb-8 hover:border-yellow-200">
         {buttonPrompts.map((prompt, index) => (
           <button
             key={index}
