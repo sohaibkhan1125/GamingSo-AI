@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const port = 3001;
 
 let promptData = {};
 
@@ -29,6 +28,6 @@ app.post('/api/update-prompt-status/:userId', (req, res) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(() => {
+  console.log(`Server is running on Vercel`);
 });
