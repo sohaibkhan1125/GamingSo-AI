@@ -1,9 +1,11 @@
 const express = require('express');
+const cors = require('cors'); 
 const app = express();
 
 let promptData = {};
 
 app.use(express.json());
+app.use(cors()); 
 
 app.post('/api/update-prompt-status/:userId', (req, res) => {
   const userId = req.params.userId;
@@ -27,7 +29,4 @@ app.post('/api/update-prompt-status/:userId', (req, res) => {
   res.json({ promptsUsed: promptData[userId].promptsUsed, timeRemaining: 24 - promptData[userId].promptsUsed });
 });
 
-
-app.listen(() => {
-  console.log(`Server is running on Vercel`);
-});
+module.exports = app; 
