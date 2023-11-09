@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 app.get('/', (req, res) => {
-  res.send('Hello from your server'); // Replace with your desired response
+  res.send('Hello from your server'); 
 });
 
 app.post('/api/update-prompt-status/:userId', (req, res) => {

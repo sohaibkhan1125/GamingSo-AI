@@ -16,8 +16,9 @@ const InputForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userHistory, setUserHistory] = useState([]);
   const [promptsUsed, setPromptsUsed] = useState(0);
-  const [promptsRemaining, setPromptsRemaining] = useState(6); 
+  const [promptsRemaining, setPromptsRemaining] = useState(6);
   const [timeRemaining, setTimeRemaining] = useState(0);
+
 
   useEffect(() => {
     const lastPromptTime = localStorage.getItem('lastPromptTime');
@@ -81,6 +82,7 @@ const InputForm = () => {
 
       if (promptsRemaining <= 0) {
         alert(`Your daily limit is complete. Try after ${formatTime(timeRemaining)}`);
+        setIsLoading(false); // You should set isLoading to false in this case
         return;
       }
       
@@ -177,13 +179,11 @@ const InputForm = () => {
       setIsConversationVisible(true);
     }
   };
-
   const handleInputKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleUserInput();
     }
   };
-
   const buttonPrompts = [
     'Discover top consoles that meet your needs',
     'Get concise steps for a full OS reinstallation',
@@ -301,7 +301,7 @@ const InputForm = () => {
         `}
       </style>
 
-      <div className="w-screen text-white text-center">
+      <div className="w-screen text-white text-center mt-5">
         <p>Prompts remaining in 24 hours: {promptsRemaining}</p>
         {promptsRemaining <= 0 && (
           <p>Time remaining: {formatTime(timeRemaining)}</p>
