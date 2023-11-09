@@ -5,34 +5,94 @@ import Image from 'next/image';
 import Logo from './Logo.png';
 import { FaPaperPlane } from 'react-icons/fa';
 import './InputForm.css';
-import { FaRedo } from 'react-icons/fa';
 
 
+
+  
 const InputForm = () => {
   const [conversation, setConversation] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isConversationVisible, setIsConversationVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userHistory, setUserHistory] = useState([]);
+  const [promptsUsed, setPromptsUsed] = useState(0);
+  const [promptsRemaining, setPromptsRemaining] = useState(6); 
+  const [timeRemaining, setTimeRemaining] = useState(0);
 
   useEffect(() => {
-    const storedUserHistory = JSON.parse(localStorage.getItem('userHistory'));
-    if (storedUserHistory) {
-      setUserHistory(storedUserHistory);
+    const lastPromptTime = localStorage.getItem('lastPromptTime');
+    const storedPromptsUsed = localStorage.getItem('promptsUsed');
+    if (lastPromptTime && storedPromptsUsed) {
+      const elapsedTime = Date.now() - parseInt(lastPromptTime);
+      const promptsUsed = parseInt(storedPromptsUsed, 10);
+
+      if (elapsedTime < 24 * 60 * 60 * 1000) {
+        setPromptsUsed(promptsUsed);
+        setPromptsRemaining(6 - promptsUsed);
+        const remainingTime = 24 * 60 * 60 * 1000 - elapsedTime;
+        setTimeRemaining(remainingTime);
+        startTimer(remainingTime);
+      } else {
+        setPromptsUsed(0);
+        setPromptsRemaining(6);
+        setTimeRemaining(0);
+      }
     }
   }, []);
+  
+  const startTimer = (remainingTime) => {
+    const intervalId = setInterval(() => {
+      if (remainingTime > 0) {
+        remainingTime -= 1000;
+        setTimeRemaining(remainingTime);
+      }
+    }, 1000);
 
-  const saveUserHistoryToLocalStorage = () => {
-    localStorage.setItem('userHistory', JSON.stringify(userHistory));
+    return () => clearInterval(intervalId);
   };
 
-  const config = require('./config');
-  const openaiApiKey = config.openaiApiKey;
+  const formatTime = (time) => {
+    const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((time / (1000 * 60)) % 60);
+    const seconds = Math.floor((time / 1000) % 60);
+
+    return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+  };
+
+  useEffect(() => {
+    const fetchPromptStatus = async () => {
+      try {
+        const response = await axios.get('/api/prompt-status/yourUserId'); 
+        const { promptsUsed, timeRemaining } = response.data;
+        setPromptsUsed(promptsUsed);
+        setPromptsRemaining(6 - promptsUsed); 
+        setTimeRemaining(timeRemaining);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchPromptStatus();
+  }, []);
 
   const handleUserInput = async () => {
     try {
       setIsLoading(true);
 
+      if (promptsRemaining <= 0) {
+        alert(`Your daily limit is complete. Try after ${formatTime(timeRemaining)}`);
+        return;
+      }
+      
+     
+      setPromptsRemaining((prevPromptsRemaining) => prevPromptsRemaining - 1);
+      setPromptsUsed((prevPromptsUsed) => prevPromptsUsed + 1);
+      localStorage.setItem('promptsUsed', promptsUsed + 1);
+
+      
+      const config = require('./config');
+    
+      const openaiApiKey = config.openaiApiKey;
       const options = {
         method: 'POST',
         url: 'https://api.openai.com/v1/engines/text-davinci-002/completions',
@@ -43,7 +103,7 @@ const InputForm = () => {
         data: {
           prompt: userInput,
           max_tokens: 500,
-        },
+        }
       };
 
       const response = await axios(options);
@@ -61,16 +121,51 @@ const InputForm = () => {
         ...userHistory,
         { prompt: userPrompt, response: botResponse, conversation: updatedConversation },
       ];
-      setUserHistory(updatedUserHistory);
 
+      setPromptsRemaining((prevPromptsRemaining) => prevPromptsRemaining - 1); 
+      setUserHistory(updatedUserHistory);
       saveUserHistoryToLocalStorage();
 
       setUserInput('');
+
+      const currentTime = Date.now();
+      localStorage.setItem('lastPromptTime', currentTime.toString());
     } catch (error) {
       console.error(error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+ 
+
+    useEffect(() => {
+      const lastPromptTime = localStorage.getItem('lastPromptTime');
+      const storedPromptsUsed = localStorage.getItem('promptsUsed');
+      if (lastPromptTime && storedPromptsUsed) {
+        const elapsedTime = Date.now() - parseInt(lastPromptTime);
+        const promptsUsed = parseInt(storedPromptsUsed, 10);
+    
+        if (elapsedTime < 24 * 60 * 60 * 1000) {
+          setPromptsUsed(promptsUsed);
+          setPromptsRemaining(6 - promptsUsed);
+        } else {
+          setPromptsUsed(0);
+          setPromptsRemaining(6);
+        }
+      }
+    }, []);
+    
+
+  useEffect(() => {
+    const storedPromptsUsed = localStorage.getItem('promptsUsed');
+    if (storedPromptsUsed) {
+      setPromptsUsed(parseInt(storedPromptsUsed, 10));
+    }
+  }, []);
+
+  const saveUserHistoryToLocalStorage = () => {
+    localStorage.setItem('userHistory', JSON.stringify(userHistory));
   };
 
   const handleButtonClick = (prompt) => {
@@ -89,11 +184,6 @@ const InputForm = () => {
     }
   };
 
-  const handleUserHistoryClick = (historyItem) => {
-    setConversation(historyItem.conversation);
-    setIsConversationVisible(true);
-  };
-
   const buttonPrompts = [
     'Discover top consoles that meet your needs',
     'Get concise steps for a full OS reinstallation',
@@ -109,7 +199,7 @@ const InputForm = () => {
   ];
 
   return (
-    <section className="w-screen">
+    <section className="w-screen overflow-hidden">
       <nav className="flex">
         <Image src={Logo} height={150} width={150} alt="Logo" />
         <ul className="text-xl text-white whitespace-nowrap flex gap-3 px-10 mt-[43px] sm:px-[75%] sm:mt-7">
@@ -125,7 +215,7 @@ const InputForm = () => {
         {buttonPrompts.map((prompt, index) => (
           <button
             key={index}
-            className={` hover:bg-gray-700 px-2 py-2 rounded border-[3px] border-[#33ccff] ${
+            className={` hover-bg-gray-700 px-2 py-2 rounded border-[3px] border-[#33ccff] ${
               index === buttonPrompts.length - 1
                 ? 'text-white text-xl font-semibold  border-[3px] hover-bg-slate-900 border-[#ff99cc]'
                 : ''
@@ -138,43 +228,40 @@ const InputForm = () => {
       </div>
 
       {isConversationVisible && (
-        <div className="w-screen h-[500px] mt-10 border-[2px] border-slate-300 rounded relative">
-          <div className="h-[400px] overflow-auto">
+        <div className="w-screen h-[400px] mt-10 border-[2px] border-slate-300 rounded relative ">
+          <div className="h-[300px] overflow-auto">
             {conversation.map((message, index) => (
               <div
                 key={index}
-                className={`message ml-6 mt-2 overflow-auto w-[90%] ${
-                  message.type === 'user' ? 'bg-gray-600 rounded px-2 py-2' : ''
+                className={`message ml-6 mt-2 w-[90%]  ${
+                  message.type === 'user' ? 'bg-gray-600 py-2 rounded-lg px-2 ' : ''
                 } text-white`}
               >
                 {message.text}
               </div>
             ))}
           </div>
-
-          <div className="absolute w-screen -mt-[40%]">
-            <input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyPress={handleInputKeyPress}
-              className="absolute bg-[transparent]  border-[2px] border-gray-500 w-[90%] mt-[42%] ml-4 rounded py-2 px-2 text-white"
-              placeholder="Send a message"
-            />
-            <div
-              className="text-white ml-[85%] sm:ml-[88%] sm:mt-[43%] mt-[46%] cursor-pointer absolute"
-              onClick={handleUserInput}
-            >
-              <FaPaperPlane />
-            </div>
-            <div className='mt-[43%] px-[93%] cursor-pointer'>
-            <FaRedo size={23} color="gray" onClick={() => window.location.reload()} />
-
+          <div className="absolute w-screen bottom-0 mb-5">
+            <div className="w-full flex items-center">
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={handleInputKeyPress}
+                className="bg-[transparent] border-[2px] border-gray-500 w-[90%] rounded py-2 px-2 text-white ml-3"
+                placeholder="Send a message"
+              />
+              <div
+                className="text-white cursor-pointer -ml-7"
+                onClick={handleUserInput}
+              >
+                <FaPaperPlane />
+              </div>
             </div>
           </div>
         </div>
       )}
-      
+
       {isLoading && (
         <div className="loader-overlay">
           <div className="loader"></div>
@@ -213,8 +300,16 @@ const InputForm = () => {
           }
         `}
       </style>
+
+      <div className="w-screen text-white text-center">
+        <p>Prompts remaining in 24 hours: {promptsRemaining}</p>
+        {promptsRemaining <= 0 && (
+          <p>Time remaining: {formatTime(timeRemaining)}</p>
+        )}
+      </div>
     </section>
   );
 };
 
 export default InputForm;
+ 
