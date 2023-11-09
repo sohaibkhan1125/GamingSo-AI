@@ -63,7 +63,7 @@ const InputForm = () => {
   useEffect(() => {
     const fetchPromptStatus = async () => {
       try {
-        const response = await axios.get('/api/prompt-status/yourUserId'); 
+        const response = await axios.get('https://splendorous-croissant-0eef27.netlify.app//api/prompt-status/yourUserId');
         const { promptsUsed, timeRemaining } = response.data;
         setPromptsUsed(promptsUsed);
         setPromptsRemaining(6 - promptsUsed); 
@@ -82,7 +82,7 @@ const InputForm = () => {
 
       if (promptsRemaining <= 0) {
         alert(`Your daily limit is complete. Try after ${formatTime(timeRemaining)}`);
-        setIsLoading(false); // You should set isLoading to false in this case
+        setIsLoading(false); 
         return;
       }
       
