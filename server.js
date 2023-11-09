@@ -5,7 +5,11 @@ const app = express();
 let promptData = {};
 
 app.use(express.json());
-app.use(cors()); 
+app.use(cors());
+
+app.get('/', (req, res) => {
+  res.send('Hello from your server'); // Replace with your desired response
+});
 
 app.post('/api/update-prompt-status/:userId', (req, res) => {
   const userId = req.params.userId;
@@ -29,4 +33,4 @@ app.post('/api/update-prompt-status/:userId', (req, res) => {
   res.json({ promptsUsed: promptData[userId].promptsUsed, timeRemaining: 24 - promptData[userId].promptsUsed });
 });
 
-module.exports = app; 
+module.exports = app;
