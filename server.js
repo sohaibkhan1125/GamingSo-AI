@@ -1,5 +1,8 @@
+const corsOptions = {
+  origin: ['https://splendorous-croissant-0eef27.netlify.app', 'https://gaming-so-ai.vercel.app', 'http://localhost:3000'],
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.get('/', (req, res) => {
   res.send('Hello from your server'); 
