@@ -5,9 +5,6 @@ import Image from 'next/image';
 import Logo from './Logo.png';
 import { FaPaperPlane } from 'react-icons/fa';
 import './InputForm.css';
-
-
-
   
 const InputForm = () => {
   const [conversation, setConversation] = useState([]);
@@ -18,8 +15,21 @@ const InputForm = () => {
   const [promptsUsed, setPromptsUsed] = useState(0);
   const [promptsRemaining, setPromptsRemaining] = useState(6);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [userId, setUserId] = useState(''); 
 
+function generateUniqueUserId() {
+  const timestamp = new Date().getTime();
+  return `user-${timestamp}`;
+}
 
+  useEffect(() => {
+    let localUserId = localStorage.getItem('userId');
+    if (!localUserId) {
+      localUserId = generateUniqueUserId();
+      localStorage.setItem('userId', localUserId);
+    }
+    setUserId(localUserId);
+  }, []);
   useEffect(() => {
     const lastPromptTime = localStorage.getItem('lastPromptTime');
     const storedPromptsUsed = localStorage.getItem('promptsUsed');
@@ -63,7 +73,7 @@ const InputForm = () => {
   useEffect(() => {
     const fetchPromptStatus = async () => {
       try {
-        const response = await axios.get('https://splendorous-croissant-0eef27.netlify.app//api/prompt-status/yourUserId');
+        const response = await axios.get('https://ec2-3-144-166-179.us-east-2.compute.amazonaws.com/'); 
         const { promptsUsed, timeRemaining } = response.data;
         setPromptsUsed(promptsUsed);
         setPromptsRemaining(6 - promptsUsed); 
@@ -215,7 +225,7 @@ const InputForm = () => {
         {buttonPrompts.map((prompt, index) => (
           <button
             key={index}
-            className={` hover-bg-gray-700 px-2 py-2 rounded border-[3px] border-[#33ccff] ${
+            className={` hover:bg-gray-700 px-2 py-2 rounded border-[3px] border-[#33ccff] ${
               index === buttonPrompts.length - 1
                 ? 'text-white text-xl font-semibold  border-[3px] hover-bg-slate-900 border-[#ff99cc]'
                 : ''

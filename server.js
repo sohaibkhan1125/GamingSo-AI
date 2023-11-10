@@ -1,18 +1,12 @@
-const express = require('express');
-const cors = require('cors'); 
-const app = express();
 
-let promptData = {};
-
-app.use(express.json());
 app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello from your server'); 
 });
 
-app.get('/api/prompt-status/yourUserId', (req, res) => {
-  const userId = 'yourUserId'; // Change 'yourUserId' to the actual user's ID
+app.post('/api/update-prompt-status/:userId', (req, res) => {
+  const userId = req.params.userId;
   if (!promptData[userId]) {
     promptData[userId] = { promptsUsed: 0, lastPromptTime: 0 };
   }
@@ -27,7 +21,7 @@ app.get('/api/prompt-status/yourUserId', (req, res) => {
     promptData[userId] = { promptsUsed: promptsUsed + 1, lastPromptTime: currentTime };
   } else {
     const timeRemaining = Math.max(0, 24 - Math.floor(elapsedTime / (1000 * 60 * 60)));
-    return res.status(400).json({ promptsUsed: promptData[userId].promptsUsed, timeRemaining });
+    return res.status(400).json({ message: `Your daily limit is complete. Try after ${timeRemaining} hours` });
   }
 
   res.json({ promptsUsed: promptData[userId].promptsUsed, timeRemaining: 24 - promptData[userId].promptsUsed });
