@@ -73,7 +73,7 @@ function generateUniqueUserId() {
   useEffect(() => {
     const fetchPromptStatus = async () => {
       try {
-        const response = await axios.get('https://ec2-3-144-166-179.us-east-2.compute.amazonaws.com/'); 
+        const response = await axios.get('/api/prompt-status/yourUserId'); 
         const { promptsUsed, timeRemaining } = response.data;
         setPromptsUsed(promptsUsed);
         setPromptsRemaining(6 - promptsUsed); 
