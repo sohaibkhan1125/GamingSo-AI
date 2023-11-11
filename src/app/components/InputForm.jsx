@@ -15,21 +15,8 @@ const InputForm = () => {
   const [promptsUsed, setPromptsUsed] = useState(0);
   const [promptsRemaining, setPromptsRemaining] = useState(6);
   const [timeRemaining, setTimeRemaining] = useState(0);
-  const [userId, setUserId] = useState(''); 
 
-function generateUniqueUserId() {
-  const timestamp = new Date().getTime();
-  return `user-${timestamp}`;
-}
 
-  useEffect(() => {
-    let localUserId = localStorage.getItem('userId');
-    if (!localUserId) {
-      localUserId = generateUniqueUserId();
-      localStorage.setItem('userId', localUserId);
-    }
-    setUserId(localUserId);
-  }, []);
   useEffect(() => {
     const lastPromptTime = localStorage.getItem('lastPromptTime');
     const storedPromptsUsed = localStorage.getItem('promptsUsed');
@@ -102,9 +89,10 @@ function generateUniqueUserId() {
       localStorage.setItem('promptsUsed', promptsUsed + 1);
 
       
-      const config = require('./config');
-    
-      const openaiApiKey = config.openaiApiKey;
+     
+      require('dotenv').config();
+
+      const openaiApiKey = process.env.OPENAI_API_KEY;
       const options = {
         method: 'POST',
         url: 'https://api.openai.com/v1/engines/text-davinci-002/completions',
@@ -119,6 +107,8 @@ function generateUniqueUserId() {
       };
 
       const response = await axios(options);
+      console.log('OpenAI API Response:', response);
+
       const botResponse = response.data.choices[0].text;
 
       const updatedConversation = [
@@ -322,4 +312,3 @@ function generateUniqueUserId() {
 };
 
 export default InputForm;
- 
